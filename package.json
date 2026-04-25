@@ -1,0 +1,18 @@
+{
+  "name": "neurallearn",
+  "version": "1.0.0",
+  "description": "Intelligent Learning Assistant",
+  "main": "app.js",
+  "scripts": {
+    "test": "jest --coverage"
+  },
+  "devDependencies": {
+    "jest": "^29.7.0",
+    "jest-environment-jsdom": "^29.7.0"
+  },
+  "jest": {
+    "testEnvironment": "jsdom",
+    "collectCoverage": true,
+    "coverageReporters": ["text", "lcov", "json"]
+  }
+}

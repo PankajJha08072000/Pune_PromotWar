@@ -155,49 +155,49 @@ async function handleSend() {
 
 // ── Gemini API ─────────────────────────────────────────────────────────────
 async function callGemini(userText) {
-  // Build conversation history for context
-  const history = state.messages.slice(-10).map(m => ({
-    role: m.role === 'ai' ? 'model' : 'user',
-    parts: [{ text: m.content }],
-  }));
-
-  const systemPrompt = buildSystemPrompt();
-
-  const payload = {
-    system_instruction: { parts: [{ text: systemPrompt }] },
-    contents: history,
-    generationConfig: {
-      temperature: 0.8,
-      topP: 0.95,
-      maxOutputTokens: 1800,
-    },
-  };
-
   // Use stored key or prompt user
-  let key = state.apiKey || localStorage.getItem('nl_api_key');
+  let key = state.apiKey || (typeof localStorage !== 'undefined' ? localStorage.getItem('nl_api_key') : null);
   if (!key) {
-    key = window.prompt('Enter your Gemini API key to start learning:\n(It will be saved locally in your browser)');
+    key = typeof window !== 'undefined' ? window.prompt('Enter your Gemini API key to start learning:\n(It will be saved locally in your browser)') : 'test-key';
     if (!key) throw new Error('No API key provided.');
-    localStorage.setItem('nl_api_key', key);
+    if (typeof localStorage !== 'undefined') localStorage.setItem('nl_api_key', key);
     state.apiKey = key;
   } else {
     state.apiKey = key;
   }
 
-  const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${key}`;
-  const res = await fetch(url, {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify(payload),
-  });
+  try {
+    // Dynamically import the SDK to maintain vanilla JS structure
+    const { GoogleGenerativeAI } = await import('https://esm.run/@google/generative-ai');
+    const genAI = new GoogleGenerativeAI(key);
+    
+    const systemPrompt = buildSystemPrompt();
+    const model = genAI.getGenerativeModel({ 
+      model: "gemini-1.5-flash",
+      systemInstruction: systemPrompt 
+    });
 
-  if (!res.ok) {
-    const err = await res.json().catch(() => ({}));
-    throw new Error(err?.error?.message || `API error ${res.status}`);
+    const history = state.messages.slice(-10).map(m => ({
+      role: m.role === 'ai' ? 'model' : 'user',
+      parts: [{ text: m.content }],
+    }));
+
+    const chat = model.startChat({
+      history: history,
+      generationConfig: {
+        temperature: 0.8,
+        topP: 0.95,
+        maxOutputTokens: 1800,
+      },
+    });
+
+    const result = await chat.sendMessage(userText);
+    const response = await result.response;
+    return response.text();
+  } catch (error) {
+    console.error('Gemini SDK Error:', error);
+    throw new Error(error.message || 'API error');
   }
-
-  const data = await res.json();
-  return data?.candidates?.[0]?.content?.parts?.[0]?.text || 'I could not generate a response. Please try again.';
 }
 
 function buildSystemPrompt() {
@@ -270,6 +270,11 @@ function renderMessage(msg) {
 }
 
 // Simple markdown → HTML parser
+/**
+ * Parses markdown text and returns sanitized HTML.
+ * @param {string} text - The raw markdown text
+ * @returns {string} Sanitized HTML string
+ */
 function parseMarkdown(text) {
   const rawHtml = text
     .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
@@ -290,7 +295,9 @@ function parseMarkdown(text) {
     .replace(/^(?!<[hupbl])(.+)$/gm, m => m ? `<p>${m}</p>` : '')
     .replace(/<p><\/p>/g, '');
     
-  return window.DOMPurify ? window.DOMPurify.sanitize(rawHtml) : rawHtml;
+  return typeof window !== 'undefined' && window.DOMPurify 
+    ? window.DOMPurify.sanitize(rawHtml) 
+    : rawHtml;
 }
 
 // ── UI helpers ─────────────────────────────────────────────────────────────
@@ -327,6 +334,11 @@ function clearChat() {
 }
 
 // ── Progress & topics ──────────────────────────────────────────────────────
+/**
+ * Extracts topics from user and AI conversation to track progress.
+ * @param {string} userMsg - User's message
+ * @param {string} aiReply - AI's response
+ */
 function extractTopics(userMsg, aiReply) {
   const combined = userMsg + ' ' + aiReply;
   const keywords = [
@@ -342,7 +354,7 @@ function extractTopics(userMsg, aiReply) {
       else state.topics[kw]++;
     }
   });
-  renderTopics();
+  if (typeof window !== 'undefined') renderTopics();
 }
 
 function renderTopics() {
@@ -489,7 +501,7 @@ function showQuizScore() {
 // ── Msg action callbacks ───────────────────────────────────────────────────
 function copyText(btn) {
   const bubble = btn.closest('.msg-body').querySelector('.msg-bubble');
-  navigator.clipboard.writeText(bubble.innerText).then(() => showToast('Copied!', 'success'));
+  navigator.clipboard.writeText(bubble.textContent || bubble.innerText).then(() => showToast('Copied!', 'success'));
 }
 
 function thumbsUp(btn) {
@@ -507,4 +519,20 @@ function thumbsDown(btn) {
 }
 
 // ── Boot ───────────────────────────────────────────────────────────────────
-document.addEventListener('DOMContentLoaded', init);
+if (typeof window !== 'undefined') {
+  window.answerQuiz = answerQuiz;
+  window.nextQuiz = nextQuiz;
+  window.openQuiz = openQuiz;
+  window.copyText = copyText;
+  window.thumbsUp = thumbsUp;
+  window.thumbsDown = thumbsDown;
+}
+
+if (typeof document !== 'undefined') {
+  document.addEventListener('DOMContentLoaded', init);
+}
+
+// ── Exports for Testing ────────────────────────────────────────────────────
+if (typeof module !== 'undefined' && module.exports) {
+  module.exports = { parseMarkdown, extractTopics, state, buildSystemPrompt };
+}
