@@ -1,0 +1,265 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>NeuralLearn — Intelligent Learning Assistant</title>
+  <meta name="description" content="NeuralLearn is an adaptive AI-powered learning assistant that personalizes your education journey through intelligent pacing, Socratic dialogue, and formative assessments." />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+
+  <!-- ===== SIDEBAR ===== -->
+  <aside class="sidebar" id="sidebar">
+    <div class="sidebar-header">
+      <div class="logo-mark">
+        <div class="logo-icon">
+          <svg width="28" height="28" viewBox="0 0 28 28" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <circle cx="14" cy="14" r="13" stroke="url(#grad1)" stroke-width="2"/>
+            <path d="M8 14c0-3.3 2.7-6 6-6s6 2.7 6 6-2.7 6-6 6" stroke="url(#grad1)" stroke-width="1.8" stroke-linecap="round"/>
+            <circle cx="14" cy="8" r="1.5" fill="url(#grad1)"/>
+            <circle cx="20" cy="14" r="1.5" fill="url(#grad2)"/>
+            <circle cx="14" cy="20" r="1.5" fill="url(#grad2)"/>
+            <circle cx="8" cy="14" r="1.5" fill="url(#grad1)"/>
+            <line x1="14" y1="9.5" x2="14" y2="12.5" stroke="url(#grad1)" stroke-width="1.5" stroke-linecap="round"/>
+            <line x1="18.5" y1="14" x2="15.5" y2="14" stroke="url(#grad2)" stroke-width="1.5" stroke-linecap="round"/>
+            <defs>
+              <linearGradient id="grad1" x1="0" y1="0" x2="28" y2="28" gradientUnits="userSpaceOnUse">
+                <stop stop-color="#a78bfa"/>
+                <stop offset="1" stop-color="#38bdf8"/>
+              </linearGradient>
+              <linearGradient id="grad2" x1="0" y1="0" x2="28" y2="28" gradientUnits="userSpaceOnUse">
+                <stop stop-color="#f472b6"/>
+                <stop offset="1" stop-color="#a78bfa"/>
+              </linearGradient>
+            </defs>
+          </svg>
+        </div>
+        <span class="logo-text">NeuralLearn</span>
+      </div>
+      <button class="sidebar-toggle" id="sidebarToggle" aria-label="Toggle sidebar">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+      </button>
+    </div>
+
+    <button class="new-session-btn" id="newSessionBtn">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+      New Learning Session
+    </button>
+
+    <!-- Progress Panel -->
+    <div class="sidebar-section">
+      <div class="section-label">Your Progress</div>
+      <div class="progress-card">
+        <div class="progress-header">
+          <span class="progress-label">Overall Mastery</span>
+          <span class="progress-value" id="masteryValue">0%</span>
+        </div>
+        <div class="progress-bar-track">
+          <div class="progress-bar-fill" id="masteryBar" style="width:0%"></div>
+        </div>
+      </div>
+      <div class="stats-row">
+        <div class="stat-chip">
+          <span class="stat-num" id="statTopics">0</span>
+          <span class="stat-lbl">Topics</span>
+        </div>
+        <div class="stat-chip">
+          <span class="stat-num" id="statQuizzes">0</span>
+          <span class="stat-lbl">Quizzes</span>
+        </div>
+        <div class="stat-chip">
+          <span class="stat-num" id="statStreak">0</span>
+          <span class="stat-lbl">Streak</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Learning Style -->
+    <div class="sidebar-section">
+      <div class="section-label">Learning Style</div>
+      <div class="style-picker" id="stylePicker">
+        <button class="style-btn active" data-style="visual" id="styleVisual">
+          <span class="style-icon">👁️</span> Visual
+        </button>
+        <button class="style-btn" data-style="practical" id="stylePractical">
+          <span class="style-icon">🔧</span> Practical
+        </button>
+        <button class="style-btn" data-style="theoretical" id="styleTheoretical">
+          <span class="style-icon">📚</span> Theoretical
+        </button>
+        <button class="style-btn" data-style="socratic" id="styleSocratic">
+          <span class="style-icon">💬</span> Socratic
+        </button>
+      </div>
+    </div>
+
+    <!-- Difficulty -->
+    <div class="sidebar-section">
+      <div class="section-label">Difficulty Level</div>
+      <div class="difficulty-slider-wrap">
+        <input type="range" min="1" max="5" value="2" class="difficulty-slider" id="difficultySlider" />
+        <div class="difficulty-labels">
+          <span>Beginner</span>
+          <span>Expert</span>
+        </div>
+        <div class="difficulty-badge" id="difficultyBadge">Beginner</div>
+      </div>
+    </div>
+
+    <!-- Topics Covered -->
+    <div class="sidebar-section">
+      <div class="section-label">Topics Covered</div>
+      <div class="topics-list" id="topicsList">
+        <div class="topics-empty">No topics yet. Start learning!</div>
+      </div>
+    </div>
+
+    <div class="sidebar-footer">
+      <div class="footer-info">
+        <div class="ai-status">
+          <span class="status-dot"></span> AI Tutor Active
+        </div>
+        <div class="session-info" id="sessionInfo">Session started</div>
+      </div>
+    </div>
+  </aside>
+
+  <!-- ===== MAIN AREA ===== -->
+  <main class="main-area" id="mainArea">
+
+    <!-- Top Bar -->
+    <header class="topbar">
+      <button class="menu-btn" id="menuBtn" aria-label="Open sidebar">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
+      </button>
+      <div class="topbar-title">
+        <span id="sessionTitle">Intelligent Learning Assistant</span>
+      </div>
+      <div class="topbar-actions">
+        <button class="action-btn" id="quizBtn" title="Take a quiz" aria-label="Start quiz">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+          Quiz Me
+        </button>
+        <button class="action-btn" id="summaryBtn" title="Get a summary" aria-label="Get summary">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10 9 9 9 8 9"/></svg>
+          Summary
+        </button>
+        <button class="action-btn secondary" id="clearBtn" title="Clear conversation" aria-label="Clear chat">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/><path d="M10 11v6"/><path d="M14 11v6"/><path d="M9 6V4h6v2"/></svg>
+        </button>
+      </div>
+    </header>
+
+    <!-- Welcome Hero (shown when no messages) -->
+    <div class="welcome-hero" id="welcomeHero">
+      <div class="hero-glow"></div>
+      <div class="hero-content">
+        <div class="hero-badge">AI-Powered Adaptive Learning</div>
+        <h1 class="hero-title">What would you like<br/>to <span class="gradient-text">learn today?</span></h1>
+        <p class="hero-subtitle">Your personal AI tutor adapts to your pace, style, and knowledge level — guiding you from basics to mastery.</p>
+        <div class="suggestion-grid" id="suggestionGrid">
+          <button class="suggestion-card" data-topic="machine learning" id="sugg1">
+            <div class="sugg-icon">🧠</div>
+            <div class="sugg-title">Machine Learning</div>
+            <div class="sugg-desc">Neural networks, algorithms & AI fundamentals</div>
+          </button>
+          <button class="suggestion-card" data-topic="quantum computing" id="sugg2">
+            <div class="sugg-icon">⚛️</div>
+            <div class="sugg-title">Quantum Computing</div>
+            <div class="sugg-desc">Qubits, superposition & quantum gates</div>
+          </button>
+          <button class="suggestion-card" data-topic="blockchain" id="sugg3">
+            <div class="sugg-icon">🔗</div>
+            <div class="sugg-title">Blockchain</div>
+            <div class="sugg-desc">Distributed ledgers, consensus & smart contracts</div>
+          </button>
+          <button class="suggestion-card" data-topic="linear algebra" id="sugg4">
+            <div class="sugg-icon">📐</div>
+            <div class="sugg-title">Linear Algebra</div>
+            <div class="sugg-desc">Vectors, matrices & transformations</div>
+          </button>
+          <button class="suggestion-card" data-topic="psychology of learning" id="sugg5">
+            <div class="sugg-icon">🧬</div>
+            <div class="sugg-title">Psychology of Learning</div>
+            <div class="sugg-desc">Memory, cognition & metacognition</div>
+          </button>
+          <button class="suggestion-card" data-topic="system design" id="sugg6">
+            <div class="sugg-icon">🏗️</div>
+            <div class="sugg-title">System Design</div>
+            <div class="sugg-desc">Scalable architecture & distributed systems</div>
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Chat Area -->
+    <div class="chat-area" id="chatArea">
+      <!-- Messages injected here -->
+    </div>
+
+    <!-- Typing Indicator -->
+    <div class="typing-indicator" id="typingIndicator" style="display:none">
+      <div class="typing-avatar">
+        <svg width="16" height="16" viewBox="0 0 28 28" fill="none"><circle cx="14" cy="14" r="13" stroke="url(#tg1)" stroke-width="2"/><path d="M8 14c0-3.3 2.7-6 6-6s6 2.7 6 6" stroke="url(#tg1)" stroke-width="1.8" stroke-linecap="round"/><circle cx="14" cy="8" r="1.5" fill="url(#tg1)"/><circle cx="20" cy="14" r="1.5" fill="url(#tg1)"/><defs><linearGradient id="tg1" x1="0" y1="0" x2="28" y2="28" gradientUnits="userSpaceOnUse"><stop stop-color="#a78bfa"/><stop offset="1" stop-color="#38bdf8"/></linearGradient></defs></svg>
+      </div>
+      <div class="typing-dots">
+        <span></span><span></span><span></span>
+      </div>
+      <span class="typing-text" id="typingText">NeuralLearn is thinking…</span>
+    </div>
+
+    <!-- Input Area -->
+    <div class="input-area">
+      <div class="quick-actions" id="quickActions">
+        <button class="quick-btn" id="qa-explain" data-action="explain">💡 Explain simpler</button>
+        <button class="quick-btn" id="qa-example" data-action="example">🔍 Give an example</button>
+        <button class="quick-btn" id="qa-test" data-action="test">✅ Test my knowledge</button>
+        <button class="quick-btn" id="qa-deeper" data-action="deeper">🚀 Go deeper</button>
+        <button class="quick-btn" id="qa-summary" data-action="summary">📋 Quick summary</button>
+      </div>
+      <div class="input-row">
+        <div class="input-wrapper">
+          <textarea
+            id="userInput"
+            class="user-input"
+            placeholder="Ask me anything… What do you want to learn today?"
+            rows="1"
+            maxlength="2000"
+            aria-label="Type your message"
+          ></textarea>
+          <div class="input-counter" id="inputCounter">0 / 2000</div>
+        </div>
+        <button class="send-btn" id="sendBtn" aria-label="Send message" disabled>
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg>
+        </button>
+      </div>
+      <div class="input-footer">
+        <span class="input-hint">Press <kbd>Enter</kbd> to send · <kbd>Shift+Enter</kbd> for new line</span>
+        <span class="char-count" id="charCount"></span>
+      </div>
+    </div>
+  </main>
+
+  <!-- Quiz Modal -->
+  <div class="modal-overlay" id="quizOverlay" style="display:none" role="dialog" aria-modal="true" aria-labelledby="quizTitle">
+    <div class="modal-box" id="quizBox">
+      <div class="modal-header">
+        <div class="modal-title" id="quizTitle">🎯 Knowledge Check</div>
+        <button class="modal-close" id="quizClose" aria-label="Close quiz">×</button>
+      </div>
+      <div class="modal-body" id="quizBody">
+        <!-- quiz content rendered here -->
+      </div>
+    </div>
+  </div>
+
+  <!-- Toast Notifications -->
+  <div class="toast-container" id="toastContainer"></div>
+
+  <script src="app.js"></script>
+</body>
+</html>

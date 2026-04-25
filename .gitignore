@@ -1,0 +1,14 @@
+# Ignore OS and editor artifacts
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# Editor dirs
+.vscode/
+.idea/
+
+# Logs
+*.log
+
+# Node (if ever added)
+node_modules/
