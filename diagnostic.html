@@ -1,0 +1,305 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>NeuralLearn - Diagnostic Test</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body {
+      font-family: 'Courier New', monospace;
+      background: #0a0a12;
+      color: #e2e8f0;
+      padding: 20px;
+    }
+    .container {
+      max-width: 900px;
+      margin: 0 auto;
+    }
+    h1 { color: #a78bfa; margin-bottom: 20px; }
+    h2 { color: #60a5fa; margin-top: 20px; margin-bottom: 10px; font-size: 16px; }
+    .section {
+      background: #16162a;
+      border: 1px solid #2a2a4a;
+      border-radius: 8px;
+      padding: 15px;
+      margin-bottom: 15px;
+    }
+    .check {
+      padding: 8px 12px;
+      margin: 5px 0;
+      border-left: 4px solid;
+      border-radius: 4px;
+      background: #1a1a2e;
+      font-size: 13px;
+    }
+    .check.success { border-left-color: #34d399; color: #34d399; }
+    .check.error { border-left-color: #f472b6; color: #f472b6; }
+    .check.warning { border-left-color: #fbbf24; color: #fbbf24; }
+    .console-box {
+      background: #0a0a12;
+      border: 1px solid #2a2a4a;
+      border-radius: 6px;
+      padding: 12px;
+      max-height: 400px;
+      overflow-y: auto;
+      font-size: 11px;
+      font-family: 'Courier New', monospace;
+      color: #e2e8f0;
+      white-space: pre-wrap;
+      word-break: break-all;
+    }
+    .console-box.loading { color: #60a5fa; }
+    .console-box.error { color: #f472b6; }
+    button {
+      background: #a78bfa;
+      color: #0a0a12;
+      border: none;
+      padding: 8px 16px;
+      border-radius: 6px;
+      cursor: pointer;
+      font-weight: bold;
+      margin-right: 10px;
+      margin-top: 10px;
+      font-size: 13px;
+    }
+    button:hover { background: #c4b5fd; }
+    .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+    .grid-item { background: #1a1a2e; padding: 10px; border-radius: 4px; border-left: 3px solid #2a2a4a; }
+    .grid-item.good { border-left-color: #34d399; }
+    .grid-item.bad { border-left-color: #f472b6; }
+    .label { color: #60a5fa; font-weight: bold; }
+    .value { color: #e2e8f0; margin-top: 4px; }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>🧠 NeuralLearn Diagnostic Dashboard</h1>
+    
+    <div class="section">
+      <h2>📊 System Status</h2>
+      <div id="systemStatus" style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px;">
+        <div class="check warning">Loading system info...</div>
+      </div>
+    </div>
+
+    <div class="section">
+      <h2>🔍 Live Console Output (Real-time)</h2>
+      <div id="liveConsole" class="console-box loading">Waiting for app.js to load...</div>
+      <button onclick="clearConsole()">Clear Console</button>
+      <button onclick="loadAppJs()">Load App</button>
+    </div>
+
+    <div class="section">
+      <h2>🧪 Quick Tests</h2>
+      <button onclick="testDOM()">Test DOM Elements</button>
+      <button onclick="testImports()">Test Imports</button>
+      <button onclick="testAPI()">Test API Key Storage</button>
+      <button onclick="testLocalStorage()">Test LocalStorage</button>
+    </div>
+
+    <div id="testResults" class="section" style="display:none;">
+      <h2>📋 Test Results</h2>
+      <div id="resultsContent"></div>
+    </div>
+  </div>
+
+  <script>
+    const logs = [];
+    const originalLog = console.log;
+    const originalError = console.error;
+    const originalWarn = console.warn;
+
+    // Intercept console
+    console.log = (...args) => {
+      const msg = args.map(a => typeof a === 'object' ? JSON.stringify(a, null, 2) : String(a)).join(' ');
+      logs.push('📋 ' + msg);
+      updateLiveConsole();
+      originalLog(...args);
+    };
+
+    console.error = (...args) => {
+      const msg = args.map(a => typeof a === 'object' ? JSON.stringify(a, null, 2) : String(a)).join(' ');
+      logs.push('❌ ' + msg);
+      updateLiveConsole();
+      originalError(...args);
+    };
+
+    console.warn = (...args) => {
+      const msg = args.map(a => typeof a === 'object' ? JSON.stringify(a, null, 2) : String(a)).join(' ');
+      logs.push('⚠️  ' + msg);
+      updateLiveConsole();
+      originalWarn(...args);
+    };
+
+    // Handle uncaught errors
+    window.onerror = (msg, url, line, col, err) => {
+      logs.push(`🔥 UNCAUGHT ERROR: ${msg} at ${url}:${line}:${col}`);
+      updateLiveConsole();
+      return false;
+    };
+
+    window.addEventListener('error', (e) => {
+      logs.push(`🔥 ERROR EVENT: ${e.message}`);
+      updateLiveConsole();
+    });
+
+    function updateLiveConsole() {
+      const el = document.getElementById('liveConsole');
+      el.textContent = logs.slice(-50).join('\n');
+      el.scrollTop = el.scrollHeight;
+      el.className = 'console-box ' + (logs.some(l => l.includes('❌') || l.includes('🔥')) ? 'error' : '');
+    }
+
+    function clearConsole() {
+      logs.length = 0;
+      updateLiveConsole();
+    }
+
+    function showResults(title, items) {
+      const resultsDiv = document.getElementById('testResults');
+      const resultsContent = document.getElementById('resultsContent');
+      resultsContent.innerHTML = `<h3>${title}</h3>` + items.map(item => 
+        `<div class="check ${item.ok ? 'success' : 'error'}">${item.ok ? '✓' : '✗'} ${item.label}: ${item.value}</div>`
+      ).join('');
+      resultsDiv.style.display = 'block';
+    }
+
+    function testDOM() {
+      const tests = [
+        { label: 'sidebar', id: 'sidebar' },
+        { label: 'userInput', id: 'userInput' },
+        { label: 'sendBtn', id: 'sendBtn' },
+        { label: 'chatArea', id: 'chatArea' },
+        { label: 'quizOverlay', id: 'quizOverlay' },
+      ];
+      const results = tests.map(test => ({
+        label: test.label,
+        ok: !!document.getElementById(test.id),
+        value: document.getElementById(test.id) ? 'Found' : 'MISSING!'
+      }));
+      showResults('DOM Element Test', results);
+    }
+
+    async function testImports() {
+      const results = [];
+      
+      // Check DOMPurify
+      results.push({
+        label: 'DOMPurify',
+        ok: typeof window.DOMPurify !== 'undefined',
+        value: typeof window.DOMPurify !== 'undefined' ? 'Loaded' : 'Not loaded'
+      });
+
+      // Check if esm.run is accessible
+      try {
+        const resp = await fetch('https://esm.run/@google/generative-ai', { method: 'HEAD' });
+        results.push({
+          label: 'Google Generative AI CDN',
+          ok: resp.ok || resp.status === 405,
+          value: `Status ${resp.status}`
+        });
+      } catch (e) {
+        results.push({
+          label: 'Google Generative AI CDN',
+          ok: false,
+          value: e.message
+        });
+      }
+
+      showResults('Import Test', results);
+    }
+
+    function testAPI() {
+      const testKey = 'test-key-12345-abcde';
+      try {
+        localStorage.setItem('nl_api_key', testKey);
+        const retrieved = localStorage.getItem('nl_api_key');
+        const success = retrieved === testKey;
+        localStorage.removeItem('nl_api_key');
+        showResults('API Key Storage Test', [{
+          label: 'localStorage',
+          ok: success,
+          value: success ? 'Working' : 'Failed'
+        }]);
+      } catch (e) {
+        showResults('API Key Storage Test', [{
+          label: 'localStorage',
+          ok: false,
+          value: e.message
+        }]);
+      }
+    }
+
+    function testLocalStorage() {
+      try {
+        const test = Math.random();
+        localStorage.setItem('test', test);
+        const val = localStorage.getItem('test');
+        localStorage.removeItem('test');
+        showResults('LocalStorage Test', [{
+          label: 'Read/Write',
+          ok: val == test,
+          value: val == test ? 'Works' : 'Failed'
+        }]);
+      } catch (e) {
+        showResults('LocalStorage Test', [{
+          label: 'Read/Write',
+          ok: false,
+          value: e.message
+        }]);
+      }
+    }
+
+    function loadAppJs() {
+      logs.length = 0;
+      logs.push('🚀 Loading app.js module...');
+      updateLiveConsole();
+      
+      const script = document.createElement('script');
+      script.type = 'module';
+      script.textContent = `
+        try {
+          console.log('Loading app module...');
+          import('./app.js').then(() => {
+            console.log('✅ app.js module loaded successfully');
+          }).catch(err => {
+            console.error('❌ Failed to load app.js:', err);
+          });
+        } catch (err) {
+          console.error('❌ Error importing app.js:', err);
+        }
+      `;
+      document.head.appendChild(script);
+    }
+
+    // Run initial diagnostics
+    window.addEventListener('load', () => {
+      logs.push('📍 Window load event fired');
+      updateLiveConsole();
+    });
+
+    window.addEventListener('DOMContentLoaded', () => {
+      logs.push('📍 DOMContentLoaded event fired');
+      updateLiveConsole();
+    });
+
+    // Check initial state
+    logs.push('✅ Diagnostic dashboard loaded');
+    logs.push(`📊 Document ready state: ${document.readyState}`);
+    logs.push(`🌐 User Agent: ${navigator.userAgent.substring(0, 50)}...`);
+    updateLiveConsole();
+  </script>
+
+  <!-- Import map for testing -->
+  <script type="importmap">
+    {
+      "imports": {
+        "@google/generative-ai": "https://esm.run/@google/generative-ai"
+      }
+    }
+  </script>
+  <!-- DOMPurify -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/dompurify/3.0.6/purify.min.js"></script>
+</body>
+</html>

@@ -3,12 +3,25 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval' https://cdnjs.cloudflare.com https://www.googletagmanager.com https://accounts.google.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src https://fonts.gstatic.com; connect-src 'self' https://generativelanguage.googleapis.com https://www.google-analytics.com; img-src 'self' data: https:; frame-src https://accounts.google.com;" />
   <title>NeuralLearn — Intelligent Learning Assistant</title>
   <meta name="description" content="NeuralLearn is an adaptive AI-powered learning assistant that personalizes your education journey through intelligent pacing, Socratic dialogue, and formative assessments." />
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet" />
   <link rel="stylesheet" href="style.css" />
+  <!-- Google Analytics -->
+  <script async src="https://www.googletagmanager.com/gtag/js?id=G-XXXXXXXXXX"></script>
+  <script>
+    window.dataLayer = window.dataLayer || [];
+    function gtag(){dataLayer.push(arguments);}
+    gtag('js', new Date());
+    gtag('config', 'G-XXXXXXXXXX');
+  </script>
+  <!-- Google Identity Services -->
+  <script src="https://accounts.google.com/gsi/client" async defer></script>
+  <!-- DOMPurify -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/dompurify/3.0.6/purify.min.js"></script>
 </head>
 <body>
 
@@ -197,12 +210,12 @@
     </div>
 
     <!-- Chat Area -->
-    <div class="chat-area" id="chatArea">
+    <div class="chat-area" id="chatArea" aria-live="polite" aria-atomic="false">
       <!-- Messages injected here -->
     </div>
 
     <!-- Typing Indicator -->
-    <div class="typing-indicator" id="typingIndicator" style="display:none">
+    <div class="typing-indicator" id="typingIndicator" style="display:none" aria-live="polite">
       <div class="typing-avatar">
         <svg width="16" height="16" viewBox="0 0 28 28" fill="none"><circle cx="14" cy="14" r="13" stroke="url(#tg1)" stroke-width="2"/><path d="M8 14c0-3.3 2.7-6 6-6s6 2.7 6 6" stroke="url(#tg1)" stroke-width="1.8" stroke-linecap="round"/><circle cx="14" cy="8" r="1.5" fill="url(#tg1)"/><circle cx="20" cy="14" r="1.5" fill="url(#tg1)"/><defs><linearGradient id="tg1" x1="0" y1="0" x2="28" y2="28" gradientUnits="userSpaceOnUse"><stop stop-color="#a78bfa"/><stop offset="1" stop-color="#38bdf8"/></linearGradient></defs></svg>
       </div>
@@ -260,6 +273,8 @@
   <!-- Toast Notifications -->
   <div class="toast-container" id="toastContainer"></div>
 
+  <script src="googleServices.js"></script>
+  <script src="testRunner.js"></script>
   <script src="app.js"></script>
 </body>
 </html>

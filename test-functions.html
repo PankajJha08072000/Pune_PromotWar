@@ -1,0 +1,181 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Function Test</title>
+  <style>
+    body { font-family: monospace; background: #0a0a12; color: #e2e8f0; padding: 20px; }
+    .test-btn { 
+      background: #a78bfa; color: #0a0a12; border: none; padding: 10px 20px; 
+      border-radius: 6px; cursor: pointer; margin: 5px; font-weight: bold;
+    }
+    .test-btn:hover { background: #c4b5fd; }
+    #output { 
+      background: #1e1e38; padding: 15px; border-radius: 6px; 
+      max-height: 500px; overflow-y: auto; margin-top: 20px; white-space: pre-wrap;
+    }
+    .error { color: #f472b6; }
+    .success { color: #34d399; }
+  </style>
+</head>
+<body>
+  <h1>🧪 NeuralLearn Function Test</h1>
+  
+  <div>
+    <button class="test-btn" onclick="testInit()">Test Init()</button>
+    <button class="test-btn" onclick="testSendBtn()">Test Send Button</button>
+    <button class="test-btn" onclick="testInput()">Test Input Element</button>
+    <button class="test-btn" onclick="testValidation()">Test Validation</button>
+    <button class="test-btn" onclick="testDOM()">Test All DOM</button>
+    <button class="test-btn" onclick="loadFullApp()">Load Full App</button>
+    <button class="test-btn" onclick="clearOutput()">Clear Output</button>
+  </div>
+
+  <div id="output"></div>
+
+  <script type="module">
+    const out = document.getElementById('output');
+    window.log = (msg, isError = false) => {
+      const div = document.createElement('div');
+      div.className = isError ? 'error' : 'success';
+      div.textContent = msg;
+      out.appendChild(div);
+      out.scrollTop = out.scrollHeight;
+    };
+
+    window.testInit = async () => {
+      out.innerHTML = '🚀 Testing init()...\n\n';
+      try {
+        const { GoogleGenerativeAI } = await import('./app.js');
+        log('✗ Import should not export GoogleGenerativeAI', true);
+      } catch (e) {
+        log(`📦 app.js module loading...`);
+        log(`⚠️  Expected: app.js runs automatically on import`);
+      }
+    };
+
+    window.testSendBtn = () => {
+      out.innerHTML = '';
+      log('🔍 Testing Send Button...');
+      const sendBtn = document.getElementById('sendBtn');
+      if (!sendBtn) {
+        log('❌ Send button not found in DOM!', true);
+        return;
+      }
+      log(`✅ Send button found: ${sendBtn.tagName}`);
+      log(`   - Disabled: ${sendBtn.disabled}`);
+      log(`   - Class: ${sendBtn.className}`);
+      log(`   - Text: ${sendBtn.textContent}`);
+      
+      // Try to trigger click
+      try {
+        sendBtn.click();
+        log(`✅ Click event triggered`);
+      } catch (e) {
+        log(`❌ Click failed: ${e.message}`, true);
+      }
+    };
+
+    window.testInput = () => {
+      out.innerHTML = '';
+      log('🔍 Testing Input...');
+      const input = document.getElementById('userInput');
+      if (!input) {
+        log('❌ Input not found!', true);
+        return;
+      }
+      log(`✅ Input found: ${input.tagName}`);
+      log(`   - Placeholder: "${input.placeholder}"`);
+      log(`   - Value: "${input.value}"`);
+      
+      // Try setting value
+      input.value = 'Test message';
+      log(`✅ Set value to: "Test message"`);
+      
+      // Trigger input event
+      input.dispatchEvent(new Event('input', { bubbles: true }));
+      log(`✅ Dispatched input event`);
+    };
+
+    window.testValidation = () => {
+      out.innerHTML = '';
+      log('🔍 Testing Validation Functions...');
+      log('Note: These functions are defined in app.js');
+      log('Cannot test directly without loading app.js');
+    };
+
+    window.testDOM = () => {
+      out.innerHTML = '';
+      log('🔍 Testing All DOM Elements...');
+      
+      const ids = [
+        'sidebar', 'menuBtn', 'sidebarToggle', 'welcomeHero', 'chatArea', 
+        'userInput', 'sendBtn', 'typingIndicator', 'quizOverlay', 'quizBody', 
+        'toastContainer', 'masteryBar', 'masteryValue', 'statTopics', 
+        'statQuizzes', 'statStreak', 'topicsList', 'difficultySlider', 
+        'difficultyBadge', 'inputCounter', 'sessionInfo', 'quizClose', 
+        'quizBtn', 'clearBtn', 'newSessionBtn', 'summaryBtn'
+      ];
+
+      let found = 0;
+      let missing = [];
+      
+      ids.forEach(id => {
+        if (document.getElementById(id)) {
+          found++;
+        } else {
+          missing.push(id);
+        }
+      });
+
+      log(`✅ Found ${found}/${ids.length} DOM elements`);
+      
+      if (missing.length > 0) {
+        log(`❌ Missing: ${missing.join(', ')}`, true);
+      } else {
+        log(`✅ All elements present!`);
+      }
+    };
+
+    window.loadFullApp = async () => {
+      out.innerHTML = '📦 Loading full app...\n\n';
+      try {
+        // Create script tag to load app.js
+        const script = document.createElement('script');
+        script.type = 'module';
+        script.src = './app.js';
+        script.onerror = () => log('❌ Failed to load app.js', true);
+        script.onload = () => log('✅ app.js loaded');
+        document.head.appendChild(script);
+        
+        log('⏳ Waiting for app to initialize...');
+        setTimeout(() => {
+          log('💡 Check browser console (F12) for app messages');
+        }, 1000);
+      } catch (e) {
+        log(`❌ Error: ${e.message}`, true);
+      }
+    };
+
+    window.clearOutput = () => {
+      out.innerHTML = '';
+    };
+
+    // Initial check
+    log('✅ Test page loaded');
+    log('Click buttons above to run tests');
+  </script>
+
+  <!-- Import map -->
+  <script type="importmap">
+    {
+      "imports": {
+        "@google/generative-ai": "https://esm.run/@google/generative-ai"
+      }
+    }
+  </script>
+  <!-- DOMPurify -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/dompurify/3.0.6/purify.min.js"></script>
+</body>
+</html>

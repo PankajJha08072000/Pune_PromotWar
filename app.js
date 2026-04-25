@@ -271,7 +271,7 @@ function renderMessage(msg) {
 
 // Simple markdown → HTML parser
 function parseMarkdown(text) {
-  return text
+  const rawHtml = text
     .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
     .replace(/```(\w+)?\n([\s\S]*?)```/g, (_, lang, code) =>
       `<pre><code class="lang-${lang || 'text'}">${code.trim()}</code></pre>`)
@@ -289,6 +289,8 @@ function parseMarkdown(text) {
     .replace(/\n\n/g, '</p><p>')
     .replace(/^(?!<[hupbl])(.+)$/gm, m => m ? `<p>${m}</p>` : '')
     .replace(/<p><\/p>/g, '');
+    
+  return window.DOMPurify ? window.DOMPurify.sanitize(rawHtml) : rawHtml;
 }
 
 // ── UI helpers ─────────────────────────────────────────────────────────────
